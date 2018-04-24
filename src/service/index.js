@@ -71,3 +71,11 @@ export const getLocation = () => {
   })
   // return resp
 }
+
+/**
+ * 去后台登录用户
+ * @param {Object} params post参数
+ * @param {String} params.code 用户登录码
+ * @param {String} params.encryptedData
+ */
+export const userLogin = (params) => fetch('login.php', params, 'post')

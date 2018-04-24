@@ -1,6 +1,8 @@
 <template>
   <div class="container">
-    <a class="weather-info" v-if="weatherInfo" href="/pages/index/main">{{weatherInfo.now.tmp}}℃ {{weatherInfo.basic.parent_city}} {{weatherInfo.basic.location}}</a>
+    <a class="weather-info" v-if="weatherInfo" href="/pages/index/main">
+    <img v-if="userInfo" :src="userInfo.avatarUrl" width="20rpx" height="20rpx">
+    {{weatherInfo.now.tmp}}℃ {{weatherInfo.basic.parent_city}} {{weatherInfo.basic.location}}</a>
     <div class="main">
       <swiper v-if="dateInfo" class="swiper" :indicator-dots="indicatorDots">
         <block v-for="(item, index) in dateInfo" :key="index">
@@ -23,7 +25,7 @@
 
 <script>
 import mptoast from 'mptoast'
-import {getLocation, getWeather, getDate} from '../../service'
+import {getLocation, getWeather, getDate, userLogin} from '../../service'
 
 export default {
   data () {
@@ -61,10 +63,18 @@ export default {
       this.showToast('正在登录中...')
       // 调用登录接口
       wx.login({
-        success: () => {
+        success: (res) => {
+          const code = res.code
+          
+          // get userinfo
           wx.getUserInfo({
+            withCredentials: true,
             success: (res) => {
               this.userInfo = res.userInfo
+              const encryptedData = res.encryptedData
+              // 去登录
+              userLogin({code, encryptedData})
+              console.log(this.userInfo)
               this.showToast('已登录')
             }
           })
@@ -84,6 +94,12 @@ export default {
   right: 20px;
   top: 0;
   color: #656565;
+  img {
+    margin-top: 10rpx;
+    width: 50rpx;
+    height: 50rpx;
+    border-radius: 50%;
+  }
 }
 .main {
   width: 100%;

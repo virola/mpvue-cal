@@ -1,6 +1,6 @@
 # wx-cal
 
-> A Mpvue project
+> A Mpvue project. It's a Calendar App
 
 ## Build Setup
 
