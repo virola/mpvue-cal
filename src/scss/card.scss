@@ -1,0 +1,105 @@
+// 规定屏幕宽为750rpx
+$win-width: 750rpx;
+
+.card-list {
+  position: relative;
+  z-index: 100;
+  min-height: 600rpx;
+  // todo
+  .card-item {
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+    opacity: 1;
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 6rpx;
+    width: 100%;
+    height: 90rpx;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 0 10rpx #aaa;
+    .card-item-hd {
+      margin: 0 40rpx;
+      padding: 20rpx 0;
+      border-bottom: 1px solid #ccc;
+    }
+    .card-item-bd {
+      padding: 40rpx;
+    }
+  }
+  .card-show {
+    z-index: 100;
+    transform: none!important;
+    height: 100%;
+  }
+  .card-hide {
+    display: none;
+  }
+}
+.card-mask {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+// 横排的卡片视图
+$card-width: $win-width * 0.72;
+$card-pos-left: ($win-width - $card-width) / 2;
+.card-row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: $win-width;
+  height: 100%;
+  // transform: translateX($win-width)!important;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+  .card {
+    position: absolute;
+    left: $card-pos-left;
+    width: $card-width;
+    top: 10%;
+    height: 70%;
+    border-radius: 16rpx;
+    background-color: #fff;
+    color: #fff;
+  }
+  // 1fb58f, eab126, f24c4e, 1b7834
+  // a7d2cb, f2d388, c98474, 874c62, f1dcd2
+  // 008f95, 946181
+  .card-style {
+    &-0 {
+      background-color: #a7d2cb;
+    }
+    &-1 {
+      background-color: #f2d388;
+    }
+    &-2 {
+      background-color: #946181;
+    }
+    &-3 {
+      background-color: #c98474;
+      // color: #656565;
+    }
+    &-4 {
+      background-color: #df744a;
+      // color: #656565;
+    }
+    &-5 {
+      background-color: #1fb58f;
+    }
+    &-6 {
+      background-color: #008f95;
+    }
+    &-7 {
+      background-color: #874c62;
+    }
+    &-8 {
+      background-color: #eab126;
+    }
+  }
+}
+

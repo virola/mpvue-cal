@@ -12,5 +12,7 @@ export default {
 </script>
 
 <style lang="scss">
+@import '../static/weui.wxss';
 @import './scss/base';
+@import './scss/card'
 </style>
