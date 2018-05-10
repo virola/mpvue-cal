@@ -1,6 +1,15 @@
+@import 'mixin';
 // 规定屏幕宽为750rpx
 $win-width: 750rpx;
 
+.card-wrap {
+  position: relative;
+  .card-mask {
+    position: absolute;
+    z-index: 100;
+    background: none;
+  }
+}
 .card-list {
   position: relative;
   z-index: 100;
@@ -25,6 +34,7 @@ $win-width: 750rpx;
       border-bottom: 1px solid #ccc;
     }
     .card-item-bd {
+      min-height: 200rpx;
       padding: 40rpx;
     }
   }
@@ -36,7 +46,7 @@ $win-width: 750rpx;
     z-index: 101;
     transform: none!important;
     width: auto;
-    height: 80%;
+    height: auto;
   }
   .card-hide {
     display: none;
@@ -48,7 +58,7 @@ $win-width: 750rpx;
   left: 0;
   right: 0;
   bottom: 0;
-  background: #fff;
+  background: rgba($color: $main-color, $alpha: .4);
 }
 // 横排的卡片视图
 $card-width: $win-width * 0.72;

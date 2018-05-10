@@ -1,15 +1,17 @@
 <template>
   <div class="container">
-    <a class="weather-info" v-if="weatherInfo" href="/pages/index/main">
-    <img v-if="userInfo" :src="userInfo.avatarUrl" width="20rpx" height="20rpx">
-    {{weatherInfo.now.tmp}}℃ {{weatherInfo.basic.parent_city}} {{weatherInfo.basic.location}}</a>
+    <a class="weather-info" v-if="weatherInfo">
+      <span>{{weatherInfo.now.tmp}}℃ {{weatherInfo.basic.parent_city}} {{weatherInfo.basic.location}}</span>
+      <img v-if="userInfo" :src="userInfo.avatarUrl" width="20rpx" height="20rpx">
+    </a>
     <div class="main">
       <div v-if="datesInfo" class="card-row" :style="{transform: 'translateX(' + -(showIndex - currentIndex) * 750 * (0.72 + 0.04) + 'rpx)'}">
         <div class="card" :class="'card-style-' + index" :style="{transform: 'translateX(' + (index - currentIndex) * 105 +'%)'}" @click="changeCard(index)" v-for="(item, index) in datesInfo" :key="index">
           <div class="card-bd">
             <div class="event-count" v-if="eventsCount && eventsCount[index] && eventsCount[index].count">
               <div class="circle">
-                {{eventsCount[index].count}}
+                <span v-if="eventsCount[index].count < 100">{{eventsCount[index].count}}</span>
+                <span class="small-size" v-else>99+</span>
               </div>
             </div>
             <div class="article">
@@ -154,17 +156,19 @@ export default {
 <style scoped lang="scss">
 @import 'src/scss/mixin';
 
+$img-size: 60rpx;
 .weather-info {
   position: absolute;
   z-index: 100;
   right: 20px;
-  top: 0;
+  top: 10px;
   color: #656565;
   img {
-    margin-top: 10rpx;
-    width: 50rpx;
-    height: 50rpx;
+    width: $img-size;
+    height: $img-size;
+    margin-left: 20rpx;
     border-radius: 50%;
+    transform: translateY(10rpx);
   }
 }
 .main {
@@ -186,6 +190,9 @@ $size: 120rpx;
     text-align: center;
     line-height: $size;
     font-size: $size * 0.5;
+    .small-size {
+      font-size: $size * 0.45;
+    }
   }
 }
 .article {

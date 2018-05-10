@@ -55,7 +55,7 @@ export default {
   &-dialog {
     position: fixed;
     z-index: 201;
-    top: 10%;
+    top: 20%;
     left: 10%;
     right: 10%;
     width: 80%;
@@ -63,12 +63,12 @@ export default {
     background-color: #fff;
     border-radius: 4px;
     border: 1px solid #ebeef5;
+    border-top-color: $main-color;
     font-size: 36rpx;
     box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
     text-align: left;
     overflow: hidden;
-    backface-visibility: hid
-    den;
+    backface-visibility: hidden;
 
     &-title {
       padding: 30rpx;

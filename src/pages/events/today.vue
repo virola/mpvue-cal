@@ -21,8 +21,9 @@
               <span class="text-warn" @click="confirmDelete(index)">删除</span>
             </div>
           </div>
-        </div>
 
+          <div class="card-mask" @click="toggleCard" v-show="showIndex > -1"></div>
+        </div>
         <div class="card-list-loadmore loadmore" @click="handleLoadMore">
           <div class="text" v-if="showLoadMore">加载更多</div>
           <div class="loading" v-if="showLoading"><span class="animation"></span></div>
@@ -31,7 +32,7 @@
       </div>
       <div class="events-list-nodata" v-else>这天没有生日记录</div>
     </div>
-    <div class="card-mask" @click="showIndex = -1" v-show="showIndex > -1"></div>
+    <div class="card-mask" @click="toggleCard" v-show="showIndex > -1"></div>
     <common-footer></common-footer>
     <mptoast />
     <add v-if="showIndex == -1" :date="date" />
@@ -87,6 +88,7 @@ export default {
   },
   methods: {
     async initData () {
+      this.showIndex = -1
       const queryDate = this.$root.$mp.query.date
       this.date = queryDate
       this.pageTitle = formatDateText(queryDate) + '生日'

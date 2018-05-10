@@ -132,6 +132,7 @@ $size: 100rpx;
   top: 10%;
   left: 10%;
   width: 80%;
+  border-top: 1px solid $main-color;
   background: #fff;
   border-radius: 6rpx;
   box-shadow: 0 1px 3px rgba(0,0,0,.3);
