@@ -1,6 +1,7 @@
 /**
  * base api
  */
+import store from '../pages/index/store'
 // const API = 'https://virola-eko.com/2018/wxcard-api/'
 const API = 'http://localhost/2018/projects/wxcard-api/'
 const DATA_API = 'http://127.0.0.1:3000/'
@@ -11,7 +12,12 @@ const DATA_URLS = {
   GET_IDS: API + 'decode/demo.php',
   LOGIN: DATA_API + 'sessions/login_open_id',
   GET_EVENTS: DATA_API + 'index/events.json',
-  GET_EVENTS_COUNT: DATA_API + 'index/count.json'
+  GET_EVENTS_COUNT: DATA_API + 'index/count.json',
+  ADD_EVENT () {
+    // console.log(store.state.userData)
+    let id = store.state.userData.id
+    return DATA_API + `members/${id}/events.json`
+  }
 }
 
 /**
@@ -49,8 +55,9 @@ export const fetch = async (url, params = {}, type = 'GET') => {
   } else {
     // 数据请求失败
     return {
-      message: resp.msg || '请求错误',
-      data: {}
+      status: resp.status || 'error',
+      message: resp.message || '请求错误',
+      data: null
     }
   }
 }
@@ -114,3 +121,5 @@ export const getIndexCount = () => fetch(DATA_URLS.GET_EVENTS_COUNT)
  * @param {string} date 日期格式 yyyy-mm-dd
  */
 export const getEventsByDate = (date = '') => fetch(DATA_URLS.GET_EVENTS, {date})
+
+export const addEvent = (data) => fetch(DATA_URLS.ADD_EVENT(), data, 'post')

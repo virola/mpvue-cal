@@ -11,7 +11,6 @@ export function formatTime (date) {
   const hour = date.getHours()
   const minute = date.getMinutes()
   const second = date.getSeconds()
-
   const t1 = [year, month, day].map(formatNumber).join('/')
   const t2 = [hour, minute, second].map(formatNumber).join(':')
 
@@ -19,6 +18,15 @@ export function formatTime (date) {
 }
 
 export function formatDate (date) {
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const t1 = [year, month, day].map(formatNumber).join('-')
+
+  return `${t1}`
+}
+
+export function formatDateText (date) {
   const nowTime = new Date()
   // dates set time to 0:00, or will be set 8:00
   const today = new Date(nowTime.getFullYear(), nowTime.getMonth(), nowTime.getDate())

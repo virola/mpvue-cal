@@ -21,13 +21,15 @@
     </div>
     <div class="card-mask" @click="showIndex = -1" v-show="showIndex > -1"></div>
     <common-footer></common-footer>
+    <add :date="date" />
   </div>
 </template>
 <script>
 import mptoast from 'mptoast'
 import store from '../index/store'
 import commonFooter from '../../components/footer'
-import {formatDate} from '../../utils'
+import add from '../../components/add'
+import {formatDateText} from '../../utils'
 import {getEventsByDate} from '../../service'
 
 export default {
@@ -35,11 +37,12 @@ export default {
     return {
       events: [],
       pageTitle: '',
-      showIndex: -1
+      showIndex: -1,
+      date: ''
     }
   },
   components: {
-    mptoast, commonFooter
+    mptoast, commonFooter, add
   },
   created () {
     this.$mptoast('加载中...')
@@ -60,7 +63,8 @@ export default {
   methods: {
     async initData () {
       const queryDate = this.$root.$mp.query.date
-      this.pageTitle = formatDate(queryDate) + '生日'
+      this.date = queryDate
+      this.pageTitle = formatDateText(queryDate) + '生日'
       this.events = await getEventsByDate(queryDate)
       // 如果只有一个卡片，则展开显示TA
       if (this.events.length === 1) {

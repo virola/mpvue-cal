@@ -4,10 +4,10 @@
     <img v-if="userInfo" :src="userInfo.avatarUrl" width="20rpx" height="20rpx">
     {{weatherInfo.now.tmp}}℃ {{weatherInfo.basic.parent_city}} {{weatherInfo.basic.location}}</a>
     <div class="main">
-      <div v-if="datesInfo" class="card-row" :style="{transform: 'translateX(' + cardTranslate + 'rpx)'}">
+      <div v-if="datesInfo" class="card-row" :style="{transform: 'translateX(' + -(showIndex - currentIndex) * 750 * (0.72 + 0.04) + 'rpx)'}">
         <div class="card" :class="'card-style-' + index" :style="{transform: 'translateX(' + (index - currentIndex) * 105 +'%)'}" @click="changeCard(index)" v-for="(item, index) in datesInfo" :key="index">
           <div class="card-bd">
-            <div class="event-count" v-if="eventsCount && eventsCount[index]">
+            <div class="event-count" v-if="eventsCount && eventsCount[index] && eventsCount[index].count">
               <div class="circle">
                 {{eventsCount[index].count}}
               </div>
@@ -17,12 +17,14 @@
                 <p>{{item.date.format}}</p>
                 <p>{{item.lunar.date}}</p>
                 <p>{{item.lunar.year}}</p>
-                <p class="tip">点击进入生日列表</p>
+                <p v-if="item.format_text !== item.date.item">{{item.format_text}}</p>
+                <p class="tip" v-if="eventsCount[index].count">点击进入生日列表</p>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <add :date="currentDate"></add>
     </div>
     <mptoast />
   </div>
@@ -30,7 +32,9 @@
 
 <script>
 import mptoast from 'mptoast'
+import add from '../../components/add'
 import store from './store'
+// import {formatDateText} from '../../utils'
 import {getLocation, getWeather, getDates, getIndexCount, getCodeIds, userLogin} from '../../service'
 
 export default {
@@ -38,14 +42,19 @@ export default {
     return {
       datesInfo: null,
       today: null,
+      currentDate: '',
+      // 最中间那个card - 今天
       currentIndex: 0,
+      // 左右滑动显示的index
+      showIndex: 0,
       eventsCount: null,
       cardTranslate: 0,
       codeParams: {}
     }
   },
   components: {
-    mptoast
+    mptoast,
+    add
   },
   computed: {
     userInfo () {
@@ -64,7 +73,8 @@ export default {
     this.initData()
   },
   watch: {
-    'codeParams': 'getOpenid'
+    'codeParams': 'getOpenid',
+    'showIndex': 'changeCurrentDate'
   },
   methods: {
     // 日期跳转
@@ -90,8 +100,11 @@ export default {
       const dates = await getDates()
       this.datesInfo = dates.list
       this.currentIndex = Math.floor(dates.list.length / 2)
-      // this.showIndex = this.currentIndex
+      this.showIndex = this.currentIndex
       this.today = dates.today
+    },
+    changeCurrentDate (index) {
+      this.currentDate = this.datesInfo[index].date.item
     },
     showToast (msg = '提示信息') {
       this.$mptoast(msg)
@@ -132,8 +145,7 @@ export default {
     },
     // click handler
     changeCard (index) {
-      this.cardTranslate = -(index - this.currentIndex) * 750 * (0.72 + 0.04)
-      // console.log(this.cardTranslate)
+      this.showIndex = index
     }
   }
 }
