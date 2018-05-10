@@ -17,6 +17,9 @@ const DATA_URLS = {
     // console.log(store.state.userData)
     let id = store.state.userData.id
     return DATA_API + `members/${id}/events.json`
+  },
+  EVENTS (id) {
+    return DATA_API + `events/${id}.json`
   }
 }
 
@@ -119,7 +122,24 @@ export const getIndexCount = () => fetch(DATA_URLS.GET_EVENTS_COUNT)
 /**
  * 根据日期获取事件
  * @param {string} date 日期格式 yyyy-mm-dd
+ * @param {number} page 页码
  */
-export const getEventsByDate = (date = '') => fetch(DATA_URLS.GET_EVENTS, {date})
+export const getEventsByDate = ({date = '', page = 1}) => fetch(DATA_URLS.GET_EVENTS, {date, page})
 
+/**
+ * 新增生日
+ * @param {Object} data 字段
+ */
 export const addEvent = (data) => fetch(DATA_URLS.ADD_EVENT(), data, 'post')
+
+/**
+ * 根据ID删除生日
+ * @param {Number} id ID
+ */
+export const deleteEvent = (id) => fetch(DATA_URLS.EVENTS(id), '', 'delete')
+
+/**
+ * 更新生日
+ * @param {Object} params 字段
+ */
+export const updateEvent = (params) => fetch(DATA_URLS.EVENTS(params.id), params, 'put')

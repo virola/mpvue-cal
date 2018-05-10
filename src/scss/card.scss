@@ -4,7 +4,7 @@ $win-width: 750rpx;
 .card-list {
   position: relative;
   z-index: 100;
-  min-height: 600rpx;
+  min-height: 700rpx;
   // todo
   .card-item {
     -webkit-transition: all 0.3s;
@@ -29,21 +29,26 @@ $win-width: 750rpx;
     }
   }
   .card-show {
-    z-index: 100;
+    position: fixed;
+    left: 20rpx;
+    right: 20rpx;
+    top: 40rpx;
+    z-index: 101;
     transform: none!important;
-    height: 100%;
+    width: auto;
+    height: 80%;
   }
   .card-hide {
     display: none;
   }
 }
 .card-mask {
-  position: absolute;
-  z-index: 1;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  background: #fff;
 }
 // 横排的卡片视图
 $card-width: $win-width * 0.72;

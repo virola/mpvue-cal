@@ -1,10 +1,5 @@
 <template>
   <div>
-    <div class="icon-wrap">
-      <div class="icon-add" @click="addClickHandler">
-        <div class="icon-text">+</div>
-      </div>
-    </div>
     <div class="mask" v-show="showAddDialog" @click="hideDialog"></div>
     <div class="dialog" v-show="showAddDialog">
       <div class="dialog-title">创建一个生日提醒</div>
@@ -14,7 +9,7 @@
         <input class="input-control" name="description" v-model="description" placeholder="这天是李雷的阴历生日" :placeholder-style="placeholderStyle">
         <div class="input-group">
           <input type="checkbox" class="input-checkbox" name="is_public" id="is_public" v-model="is_public">
-          <label for="is_public">所有人公开</label>
+          <label for="is_public">对所有人公开</label>
         </div>
         <div class="input-group">
           <button type="submit" class="btn-primary" @click="addEvent">立即创建</button>
@@ -22,8 +17,8 @@
         <div v-if="errorMessage" class="error-message">{{errorMessage}}</div>
       </div>
     </div>
-    <div class="icon-wrap" v-show="showAddDialog" @click="hideDialog">
-      <div class="icon-close">
+    <div class="icon-wrap">
+      <div @click="changeDialogStatus" class="icon" :class="{'icon-add': !showAddDialog, 'icon-close': showAddDialog}">
         <div class="icon-text">+</div>
       </div>
     </div>
@@ -52,10 +47,8 @@ export default {
     }
   },
   methods: {
-    addClickHandler () {
-      // const date = this.date
-      // console.log(date)
-      this.showAddDialog = true
+    changeDialogStatus () {
+      this.showAddDialog = !this.showAddDialog
     },
     hideDialog () {
       this.showAddDialog = false
@@ -64,7 +57,15 @@ export default {
       const formData = {
         name: this.name,
         description: this.description,
+        date: this.date,
         'is_public': this['is_public']
+      }
+      if (!formData.name) {
+        this.errorMessage = '标题不能为空'
+        return
+      }
+      if (!formData.date) {
+        this.errorMessage = '日期不能为空'
       }
       // console.log(formData)
       const resp = await addEvent(formData)
@@ -85,19 +86,21 @@ export default {
 $size: 100rpx;
 .icon-wrap {
   position: fixed;
+  z-index: 100;
   bottom: 30rpx;
   left: 50%;
   transform: translateX(-50%);
   width: $size;
   height: $size;
 
-  .icon-add, .icon-close {
+  .icon {
     width: 100%;
     height: 100%;
     border-radius: 50%;
     background: $main-color;
     color: #fff;
     text-align: center;
+    transition: all .3s linear;
   }
   .icon-text {
     position: absolute;
@@ -109,13 +112,13 @@ $size: 100rpx;
     line-height: 0.8;
   }
   .icon-close {
-    background: #999;
+    background: #aaa;
     transform: rotate(45deg);
   }
 }
 .mask {
   position: fixed;
-  z-index: 10000;
+  z-index: 100;
   left: 0;
   top: 0;
   width: 100%;
@@ -124,8 +127,8 @@ $size: 100rpx;
   background: #000;
 }
 .dialog {
-  position: absolute;
-  z-index: 10002;
+  position: fixed;
+  z-index: 102;
   top: 10%;
   left: 10%;
   width: 80%;
@@ -149,6 +152,9 @@ $size: 100rpx;
   width: 100%;
   margin-bottom: 40rpx;
 }
+// .input-group {
+//   padding-bottom: 20rpx;
+// }
 textarea {
   height: 10;
 }
