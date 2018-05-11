@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="mask" v-show="showAddDialog" @click="hideDialog"></div>
-    <div class="dialog" v-show="showAddDialog">
+    <div class="mask" v-if="showAddDialog" @click="hideDialog"></div>
+    <div class="dialog" v-if="showAddDialog">
       <div class="dialog-title">创建一个生日提醒</div>
       <div class="dialog-content">
         <input class="input-control" type="date" name="date" v-model="formData.date" required>

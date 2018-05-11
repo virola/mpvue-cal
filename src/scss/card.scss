@@ -88,32 +88,41 @@ $card-pos-left: ($win-width - $card-width) / 2;
   .card-style {
     &-0 {
       background-color: #a7d2cb;
+      box-shadow: 0 0 5px rgba($color: #a7d2cb, $alpha: .4);
     }
     &-1 {
       background-color: #f2d388;
+      box-shadow: 0 0 5px rgba($color: #f2d388, $alpha: .4);
     }
     &-2 {
       background-color: #946181;
+      box-shadow: 0 0 5px rgba($color: #946181, $alpha: .4);
     }
     &-3 {
       background-color: #c98474;
+      box-shadow: 0 0 5px rgba($color: #c98474, $alpha: .4);
       // color: #656565;
     }
     &-4 {
       background-color: #df744a;
+      box-shadow: 0 0 5px rgba($color: #df744a, $alpha: .4);
       // color: #656565;
     }
     &-5 {
       background-color: #1fb58f;
+      box-shadow: 0 0 5px rgba($color: #1fb58f, $alpha: .4);
     }
     &-6 {
       background-color: #008f95;
+      box-shadow: 0 0 5px rgba($color: #008f95, $alpha: .4);
     }
     &-7 {
       background-color: #874c62;
+      box-shadow: 0 0 5px rgba($color: #874c62, $alpha: .4);
     }
     &-8 {
       background-color: #eab126;
+      box-shadow: 0 0 5px rgba($color: #eab126, $alpha: .4);
     }
   }
 }

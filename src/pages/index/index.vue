@@ -6,7 +6,7 @@
     </a>
     <div class="main">
       <div v-if="datesInfo" class="card-row" :style="{transform: 'translateX(' + -(showIndex - currentIndex) * 750 * (0.72 + 0.04) + 'rpx)'}">
-        <div class="card" :class="'card-style-' + index" :style="{transform: 'translateX(' + (index - currentIndex) * 105 +'%)'}" @click="changeCard(index)" v-for="(item, index) in datesInfo" :key="index">
+        <div class="card" :class="'card-style-' + index" :style="{transform: 'translateX(' + (index - currentIndex) * 105 +'%)'}" @click="changeCard(index)" @tap="changeCard(index)" v-for="(item, index) in datesInfo" :key="index">
           <div class="card-bd">
             <div class="event-count" v-if="eventsCount && eventsCount[index] && eventsCount[index].count">
               <div class="circle">
@@ -85,10 +85,10 @@ export default {
       wx.navigateTo({ url })
     },
     async initData () {
-      const location = await getLocation()
-      // weather
-      // cache 减少请求
       if (!this.weatherInfo) {
+        const location = await getLocation()
+        // weather
+        // cache 减少请求
         let timestamp = Math.round(Date.parse(new Date()) / 1000)
         const data = await getWeather({
           location: location.longitude + ',' + location.latitude,
@@ -179,6 +179,7 @@ $img-size: 60rpx;
 .main {
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 $size: 120rpx;
