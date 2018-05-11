@@ -12,7 +12,14 @@
               <span class="date-tag text-info">{{item.date_format}}</span>
             </div>
             <div class="card-item-bd">
-              <p class="author">创建人: {{item.member.nickname}}</p>
+              <div class="flex-row">
+                <view class="author">创建人: {{item.member.nickname}}</view>
+                <view class="public">
+                  <text v-if="item.is_public">公开</text>
+                  <text v-else>私有</text>
+                </view>
+              </div>
+              
               <p class="desc">{{item.description}}</p>
               <p class="date text-secondary">{{item.date}}</p>
             </div>
@@ -35,7 +42,7 @@
     <div class="card-mask" @click="toggleCard" v-show="showIndex > -1"></div>
     <common-footer></common-footer>
     <mptoast />
-    <add v-if="showIndex == -1" :date="date" />
+    <add v-if="showIndex == -1" :date="date" @created="createSuccess" />
 
     <confirm-dialog v-if="showDialog" @submit="submitDelete" @cancel="showDialog = 0" :content="dialogContent" />
   </div>
@@ -122,21 +129,23 @@ export default {
       this.dialogContent = '确定要删除 ' + data.name + ' 吗？'
       this.showDialog = 1
     },
+    // 确认删除卡片的操作
     async submitDelete () {
       const data = this.events[this.deleteIndex]
       if (data && data.id) {
         let result = await deleteEvent(data.id)
         // console.log(result)
-        if (!result.status) {
+        if (result.status) {
+          // fail
+          this.$mptoast(result.message)
+        } else {
           // success
           this.$mptoast('删除成功')
           // 隐藏&重置
-          this.showDialog = 0
           this.showIndex = -1
           this.events.splice(this.deleteIndex, 1)
           this.deleteIndex = -1
-        } else {
-          this.$mptoast(result.message)
+          this.showDialog = 0
         }
       }
     },
@@ -156,11 +165,18 @@ export default {
         this.showLoadOver = 1
       }
       this.showLoading = 0
+    },
+    // 新建成功
+    createSuccess (event) {
+      if (event.id && event.date === this.date) {
+        this.events.unshift(event)
+      }
     }
   }
 }
 </script>
 <style lang="scss" scoped>
+@import '../../scss/mixin';
 .page__title {
   font-weight: 600;
   text-align: center;
@@ -209,10 +225,17 @@ export default {
   .date, .card-item-operates {
     display: block;
   }
+  .title {
+    color: $main-color;
+  }
 }
-.author {
+.author, .public {
   color: #999;
   font-size: 32rpx;
+}
+.desc {
+  margin-top: 20px;
+  word-wrap: break-word;
 }
 .events-list-nodata {
   padding: 80rpx 0;

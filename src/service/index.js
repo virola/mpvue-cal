@@ -4,22 +4,21 @@
 import store from '../pages/index/store'
 // const API = 'https://virola-eko.com/2018/wxcard-api/'
 const API = 'http://localhost/2018/projects/wxcard-api/'
-const DATA_API = 'http://127.0.0.1:3000/'
+const DATA_API = 'http://127.0.0.1:3000/api/v1/'
 
 const DATA_URLS = {
   WEATHER: API + 'weather.json',
   DATES: API + 'date.php',
   GET_IDS: API + 'decode/demo.php',
-  LOGIN: DATA_API + 'sessions/login_open_id',
-  GET_EVENTS: DATA_API + 'index/events.json',
-  GET_EVENTS_COUNT: DATA_API + 'index/count.json',
-  ADD_EVENT () {
-    // console.log(store.state.userData)
-    let id = store.state.userData.id
-    return DATA_API + `members/${id}/events.json`
-  },
+
+  LOGIN: DATA_API + 'session/login',
+  GET_EVENTS: DATA_API + 'index/events',
+  GET_EVENTS_COUNT: DATA_API + 'index/count',
   EVENTS (id) {
-    return DATA_API + `events/${id}.json`
+    if (!id) {
+      return DATA_API + 'events'
+    }
+    return DATA_API + `events/${id}`
   }
 }
 
@@ -33,6 +32,15 @@ export const fetch = async (url, params = {}, type = 'GET') => {
   if (!url) {
     return (new Promise()).resolve()
   }
+  const usertoken = store.state.userData ? `Token token=${store.state.userData.token}, username=${store.state.userData.username}` : ''
+  let headers = {
+    'X-Requested-With': 'XMLHttpRequest',
+    'content-type': 'application/json' // 默认值
+  }
+  if (usertoken) {
+    // console.log(usertoken)
+    headers['Authorization'] = usertoken
+  }
   type = type.toUpperCase()
   const resp = await new Promise((resolve, reject) => {
     console.log(url)
@@ -40,9 +48,7 @@ export const fetch = async (url, params = {}, type = 'GET') => {
       url: url,
       data: params,
       method: type,
-      header: {
-        'content-type': 'application/json' // 默认值
-      },
+      header: headers,
       withCredentials: true,
       success (res) {
         resolve(res.data)  // 把返回的数据传出去
@@ -94,7 +100,6 @@ export const getLocation = () => {
       }
     })
   })
-  // return resp
 }
 
 /**
@@ -130,7 +135,7 @@ export const getEventsByDate = ({date = '', page = 1}) => fetch(DATA_URLS.GET_EV
  * 新增生日
  * @param {Object} data 字段
  */
-export const addEvent = (data) => fetch(DATA_URLS.ADD_EVENT(), data, 'post')
+export const addEvent = (data) => fetch(DATA_URLS.EVENTS(), data, 'post')
 
 /**
  * 根据ID删除生日

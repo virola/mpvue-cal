@@ -4,15 +4,18 @@
     <div class="dialog" v-show="showAddDialog">
       <div class="dialog-title">创建一个生日提醒</div>
       <div class="dialog-content">
-        <input class="input-control" type="date" name="date" v-model="date" required>
-        <input type="text" class="input-control" name="name" placeholder="生日名称：李雷" v-model="name" :placeholder-style="placeholderStyle" focus="true" />
-        <input class="input-control" name="description" v-model="description" placeholder="这天是李雷的阴历生日" :placeholder-style="placeholderStyle">
+        <input class="input-control" type="date" name="date" v-model="formData.date" required>
+        <input type="text" class="input-control" name="name" placeholder="生日名称：李雷" v-model="formData.name" :placeholder-style="placeholderStyle" focus="true" />
+        <input class="input-control" name="description" v-model="formData.description" placeholder="这天是李雷的阴历生日" :placeholder-style="placeholderStyle">
         <div class="input-group">
-          <input type="checkbox" class="input-checkbox" name="is_public" id="is_public" v-model="is_public">
-          <label for="is_public">对所有人公开</label>
+          <checkbox-group @change="changePublic">
+            <label class="checkbox">
+              <checkbox  class="input-checkbox" name="is_public" id="is_public" value="1" :checked="formData.isPublic" />对所有人公开
+            </label>
+          </checkbox-group>
         </div>
         <div class="input-group">
-          <button type="submit" class="btn-primary" @click="addEvent">立即创建</button>
+          <button type="submit" class="btn-primary" :loading="loading" @click="addEventHandler">立即创建</button>
         </div>
         <div v-if="errorMessage" class="error-message">{{errorMessage}}</div>
       </div>
@@ -31,11 +34,16 @@ export default {
   props: [ 'date' ],
   data () {
     return {
+      initDate: '',
       showAddDialog: false,
       placeholderStyle: 'color:#ddd;',
-      name: '',
-      description: '',
-      'is_public': false,
+      formData: {
+        name: '',
+        description: '',
+        isPublic: false
+      },
+      // ajax doing
+      loading: false,
       errorMessage: ''
     }
   },
@@ -45,36 +53,62 @@ export default {
       const today = new Date()
       this.date = formatDate(today)
     }
+    this.formData.date = this.date
+  },
+  watch: {
+    'date': 'changeDate'
   },
   methods: {
+    changeDate (newDate) {
+      // console.log(newDate)
+      this.date = newDate
+      this.formData.date = newDate
+    },
     changeDialogStatus () {
       this.showAddDialog = !this.showAddDialog
     },
     hideDialog () {
       this.showAddDialog = false
     },
-    async addEvent () {
-      const formData = {
-        name: this.name,
-        description: this.description,
-        date: this.date,
-        'is_public': this['is_public']
-      }
-      if (!formData.name) {
+    async addEventHandler () {
+      this.errorMessage = ''
+      if (!this.formData.name) {
         this.errorMessage = '标题不能为空'
         return
       }
-      if (!formData.date) {
+      if (!this.formData.date) {
         this.errorMessage = '日期不能为空'
+        return
       }
-      // console.log(formData)
-      const resp = await addEvent(formData)
-      // console.log(resp)
-      if (resp.status !== 'ok') {
-        this.errorMessage = resp.message
-      } else {
-        this.errorMessage = ''
+      const formData = this.formData
+      formData['is_public'] = formData.isPublic
+      if (this.loading) {
+        return
+      }
+      this.loading = true
+      const data = await addEvent(formData)
+      // console.log(data)
+      this.loading = false
+      if (data.id) {
+        this.errorMessage = '创建成功'
+        this.resetForm()
         this.hideDialog()
+        // emit parent
+        this.$emit('created', data)
+      } else {
+        this.errorMessage = data.message
+      }
+    },
+    changePublic () {
+      this.formData.isPublic = !this.formData.isPublic
+    },
+    resetForm () {
+      this.errorMessage = ''
+      this.formData = {
+        name: '',
+        description: '',
+        date: this.date,
+        isPublic: false
       }
     }
   }

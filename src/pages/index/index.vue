@@ -26,7 +26,7 @@
           </div>
         </div>
       </div>
-      <add :date="currentDate"></add>
+      <add :date="currentDate" @created="createSuccess"></add>
     </div>
     <mptoast />
   </div>
@@ -98,7 +98,6 @@ export default {
       }
       // date cal
       this.eventsCount = (await getIndexCount()).list
-      // console.log(this.eventsCount)
       const dates = await getDates()
       this.datesInfo = dates.list
       this.currentIndex = Math.floor(dates.list.length / 2)
@@ -148,6 +147,12 @@ export default {
     // click handler
     changeCard (index) {
       this.showIndex = index
+    },
+    createSuccess (event) {
+      if (event.id && event.date === this.eventsCount[this.showIndex].date) {
+        // +1
+        this.eventsCount[this.showIndex].count++
+      }
     }
   }
 }
