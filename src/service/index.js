@@ -2,12 +2,15 @@
  * base api
  */
 import store from '../pages/index/store'
-// const API = 'https://virola-eko.com/2018/wxcard-api/'
-const API = 'http://localhost/2018/projects/wxcard-api/'
-const DATA_API = 'http://127.0.0.1:3000/api/v1/'
+// production
+const API = 'https://www.virola-eko.com/2018/wxcard-api/'
+const DATA_API = 'https://www.virola-eko.com/api/v1/'
+// development
+// const API = 'http://localhost/2018/projects/wxcard-api/'
+// const DATA_API = 'http://127.0.0.1:3000/api/v1/'
 
 const DATA_URLS = {
-  WEATHER: API + 'weather.json',
+  WEATHER: API + 'weather.php',
   DATES: API + 'date.php',
   GET_IDS: API + 'decode/demo.php',
 
