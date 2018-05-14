@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <a class="weather-info" v-if="weatherInfo">
-      <span>{{weatherInfo.now.tmp}}℃ {{weatherInfo.basic.parent_city}} {{weatherInfo.basic.location}}</span>
+    <a class="weather-info">
+      <span v-if="weatherInfo">{{weatherInfo.now.tmp}}℃ {{weatherInfo.basic.parent_city}} {{weatherInfo.basic.location}}</span>
       <img v-if="userInfo" :src="userInfo.avatarUrl" width="20rpx" height="20rpx">
     </a>
     <div class="main">

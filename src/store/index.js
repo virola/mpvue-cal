@@ -43,14 +43,16 @@ const store = new Vuex.Store({
       wx.login({
         success (res) {
           if (res.code) {
+            // 用户登录或未登录都有一个code，大概表示会话状态
             commit('setCode', res.code)
-            dispatch('getUserData')
             // get userinfo
             if (!state.userInfo) {
               wx.getUserInfo({
                 withCredentials: true,
                 success (res) {
+                  // console.log(res)
                   commit('setUserInfo', {...res.userInfo})
+                  dispatch('getUserData')
                 }
               })
             }

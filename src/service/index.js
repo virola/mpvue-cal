@@ -93,6 +93,7 @@ export const getDates = (date = '') => fetch(DATA_URLS.DATES, date)
  */
 export const getLocation = () => {
   return new Promise((resolve, reject) => {
+    console.log('wx.getSetting, scope.userLocation')
     // 可以通过 wx.getSetting 先查询一下用户是否授权了 "scope.userLocation" 这个 scope
     wx.getSetting({
       success (res) {
