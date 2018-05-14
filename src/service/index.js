@@ -1,7 +1,7 @@
 /**
  * base api
  */
-import store from '../pages/index/store'
+import store from '@/store'
 // production
 const API = 'https://www.virola-eko.com/2018/wxcard-api/'
 const DATA_API = 'https://www.virola-eko.com/api/v1/'
@@ -46,7 +46,7 @@ export const fetch = async (url, params = {}, type = 'GET') => {
   }
   type = type.toUpperCase()
   const resp = await new Promise((resolve, reject) => {
-    console.log(url)
+    // console.log(url)
     wx.request({
       url: url,
       data: params,
@@ -54,10 +54,10 @@ export const fetch = async (url, params = {}, type = 'GET') => {
       header: headers,
       withCredentials: true,
       success (res) {
-        resolve(res.data)  // 把返回的数据传出去
+        resolve(res.data) // 把返回的数据传出去
       },
       fail (ret) {
-        reject(ret)   // 把错误信息传出去
+        reject(ret) // 把错误信息传出去
       }
     })
   })
@@ -93,10 +93,29 @@ export const getDates = (date = '') => fetch(DATA_URLS.DATES, date)
  */
 export const getLocation = () => {
   return new Promise((resolve, reject) => {
-    wx.getLocation({
-      type: 'wgs84',
+    // 可以通过 wx.getSetting 先查询一下用户是否授权了 "scope.userLocation" 这个 scope
+    wx.getSetting({
       success (res) {
-        resolve(res)
+        if (!res.authSetting['scope.userLocation']) {
+          wx.authorize({
+            scope: 'scope.userLocation',
+            success () {
+              // 用户已经同意小程序使用录音功能，后续调用 wx.startRecord 接口不会弹窗询问
+              wx.getLocation({
+                type: 'wgs84',
+                success (res) {
+                  resolve(res)
+                },
+                fail (ret) {
+                  reject(ret)
+                }
+              })
+            },
+            fail (ret) {
+              reject(ret)
+            }
+          })
+        }
       },
       fail (ret) {
         reject(ret)
@@ -132,7 +151,13 @@ export const getIndexCount = () => fetch(DATA_URLS.GET_EVENTS_COUNT)
  * @param {string} date 日期格式 yyyy-mm-dd
  * @param {number} page 页码
  */
-export const getEventsByDate = ({date = '', page = 1}) => fetch(DATA_URLS.GET_EVENTS, {date, page})
+export const getEventsByDate = ({
+  date = '',
+  page = 1
+}) => fetch(DATA_URLS.GET_EVENTS, {
+  date,
+  page
+})
 
 /**
  * 新增生日

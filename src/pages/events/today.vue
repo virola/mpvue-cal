@@ -23,7 +23,7 @@
               <p class="desc">{{item.description}}</p>
               <p class="date text-secondary">{{item.date}}</p>
             </div>
-            <div class="card-item-operates" v-if="userData.id && userData.id == item.member_id">
+            <div class="card-item-operates" v-if="userData && userData.id && userData.id == item.member_id">
               <span class="text-primary" @click="startEdit(index)">编辑</span>
               <span class="text-warn" @click="confirmDelete(index)">删除</span>
             </div>
@@ -31,7 +31,7 @@
 
           <div class="card-mask" @click="toggleCard" v-show="showIndex > -1"></div>
         </div>
-        <div class="card-list-loadmore loadmore" @click="handleLoadMore">
+        <div v-if="events.length >= 10" class="loadmore" @click="handleLoadMore">
           <div class="text" v-if="showLoadMore">加载更多</div>
           <div class="loading" v-if="showLoading"><span class="animation"></span></div>
           <div class="text loadmore-over" v-if="showLoadOver">- END -</div>
@@ -39,20 +39,24 @@
       </div>
       <div class="events-list-nodata" v-else>这天没有生日记录</div>
     </div>
+    <div class="page__bd page__bd_spacing" v-else>
+      <div class="loading">数据加载中...</div>
+    </div>
     <div class="card-mask" @click="toggleCard" v-show="showIndex > -1"></div>
     <common-footer></common-footer>
     <mptoast />
-    <add v-if="showIndex == -1" :date="date" @created="createSuccess" />
-
+    <add v-if="showIndex == -1" :date="date" @created="createSuccess" @showDialog="bindShowAdd" />
     <confirm-dialog v-if="showDialog" @submit="submitDelete" @cancel="showDialog = 0" :content="dialogContent" />
+    <authDialog :show="showAuthorize" @hide="changeAuthorize(0)" />
   </div>
 </template>
 <script>
 import mptoast from 'mptoast'
-import store from '../index/store'
+import store from '@/store'
 import commonFooter from '../../components/footer'
 import add from '../../components/add'
 import confirmDialog from '../../components/dialog'
+import authDialog from '../../components/authorize'
 import {formatDateText} from '../../utils'
 import {getEventsByDate, deleteEvent} from '../../service'
 
@@ -64,6 +68,8 @@ export default {
       pageTitle: '',
       showIndex: -1,
       date: '',
+      // 授权登录mask
+      showAuthorize: false,
       // 确认框
       deleteIndex: -1,
       showDialog: 0,
@@ -77,7 +83,7 @@ export default {
     }
   },
   components: {
-    mptoast, commonFooter, add, confirmDialog
+    mptoast, commonFooter, add, confirmDialog, authDialog
   },
   created () {
     this.$mptoast('加载中...')
@@ -134,7 +140,6 @@ export default {
       const data = this.events[this.deleteIndex]
       if (data && data.id) {
         let result = await deleteEvent(data.id)
-        // console.log(result)
         if (result.status) {
           // fail
           this.$mptoast(result.message)
@@ -171,6 +176,15 @@ export default {
       if (event.id && event.date === this.date) {
         this.events.unshift(event)
       }
+    },
+    // 显示新建事件的时候，需要验证用户权限
+    bindShowAdd () {
+      if (!this.userInfo) {
+        this.showAuthorize = 1
+      }
+    },
+    changeAuthorize (val) {
+      this.showAuthorize = val
     }
   }
 }
@@ -186,6 +200,9 @@ export default {
 }
 .card-item-hd {
   position: relative;
+}
+.title {
+  padding: 5px 0;
 }
 .date, .date-tag {
   position: absolute;
@@ -205,18 +222,6 @@ export default {
   span {
     margin-right: 30rpx;
   }
-}
-.text-info {
-  color: #17a2b8!important;
-}
-.text-primary {
-  color: #007bff!important;
-}
-.text-warn {
-  color: #dc3545!important;
-}
-.text-secondary {
-  color: #6c757d!important;
 }
 .card-show {
   .date-tag {

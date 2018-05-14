@@ -35,28 +35,45 @@ page {
 }
 
 .page__desc {
-  margin-top: 5rpx;
+  margin-top: 5px;
   color: #888888;
   text-align: left;
-  font-size: 14rpx;
+  font-size: 14px;
 }
 
 .container {
   min-height: 100%;
 }
-/* this rule will be remove */
-* {
-  transition: width 2s;
-  -moz-transition: width 2s;
-  -webkit-transition: width 2s;
-  -o-transition: width 2s;
+.text-info {
+  color: #17a2b8!important;
+}
+.text-primary {
+  color: #007bff!important;
+}
+.text-warn {
+  color: #dc3545!important;
+}
+.text-secondary {
+  color: #6c757d!important;
+}
+
+$close-size: 36px;
+.icon-close {
+  position: absolute;
+  width: $close-size;
+  height: $close-size;
+  color: #999;
+  
+  &-text {
+    font-size: $close-size;
+    line-height: 1;
+    transform: rotate(45deg);
+  }
 }
 
 .flex-row {
   display: flex;
   flex-flow: row wrap;
-  // flex-direction: row;
-  // flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
 }

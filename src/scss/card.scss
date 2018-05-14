@@ -24,16 +24,16 @@ $win-width: 750rpx;
     top: 0;
     border-radius: 6rpx;
     width: 100%;
-    height: 90rpx;
+    // height: 90rpx;
     overflow: hidden;
     background: #fff;
     box-shadow: 0 0 10rpx #aaa;
     .card-item-hd {
       margin: 0 40rpx;
       padding: 20rpx 0;
-      border-bottom: 1px solid #ccc;
     }
     .card-item-bd {
+      display: none;
       padding: 40rpx;
       padding-bottom: 120rpx;
     }
@@ -47,6 +47,13 @@ $win-width: 750rpx;
     transform: none!important;
     width: auto;
     height: auto;
+
+    .card-item-hd {
+      border-bottom: 1px solid #ccc;
+    }
+    .card-item-bd {
+      display: block;
+    }
   }
   .card-hide {
     display: none;

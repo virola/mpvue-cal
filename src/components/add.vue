@@ -4,7 +4,11 @@
     <div class="dialog" v-if="showAddDialog">
       <div class="dialog-title">创建一个生日提醒</div>
       <div class="dialog-content">
-        <input class="input-control" type="date" name="date" v-model="formData.date" required>
+        <picker mode="date" :value="formData.date" start="1970-01-01" end="2099-09-01" @change="changeDateInput">
+          <view class="picker">
+            选择日期： {{formData.date}}
+          </view>
+        </picker>
         <input type="text" class="input-control" name="name" placeholder="生日名称：李雷" v-model="formData.name" :placeholder-style="placeholderStyle" focus="true" />
         <input class="input-control" name="description" v-model="formData.description" placeholder="这天是李雷的阴历生日" :placeholder-style="placeholderStyle">
         <div class="input-group">
@@ -30,14 +34,17 @@
 <script>
 import {formatDate} from '../utils'
 import {addEvent} from '../service'
+
 export default {
   props: [ 'date' ],
   data () {
     return {
+      // data
       initDate: '',
       showAddDialog: false,
       placeholderStyle: 'color:#ddd;',
       formData: {
+        date: '',
         name: '',
         description: '',
         isPublic: false
@@ -56,13 +63,23 @@ export default {
     this.formData.date = this.date
   },
   watch: {
-    'date': 'changeDate'
+    'date': 'changeDate',
+    'showAddDialog': 'bindShow'
   },
   methods: {
     changeDate (newDate) {
-      // console.log(newDate)
       this.date = newDate
       this.formData.date = newDate
+    },
+    bindShow (val) {
+      if (val) {
+        this.$emit('showDialog')
+      } else {
+        this.$emit('hideDialog')
+      }
+    },
+    changeDateInput (e) {
+      this.formData.date = e.mp.detail.value
     },
     changeDialogStatus () {
       this.showAddDialog = !this.showAddDialog
@@ -96,6 +113,10 @@ export default {
         // emit parent
         this.$emit('created', data)
       } else {
+        if (data.status === 401) {
+          // authorize
+          this.$emit('showDialog', 1)
+        }
         this.errorMessage = data.message
       }
     },
@@ -187,9 +208,9 @@ $size: 100rpx;
   width: 100%;
   margin-bottom: 40rpx;
 }
-// .input-group {
-//   padding-bottom: 20rpx;
-// }
+.picker {
+  margin-bottom: 40rpx;
+}
 textarea {
   height: 10;
 }
