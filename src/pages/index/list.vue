@@ -39,7 +39,6 @@ import mptoast from 'mptoast'
 import add from '../../components/add'
 import authDialog from '../../components/authorize'
 import store from '@/store'
-// import {formatDateText} from '../../utils'
 import {getLocation, getWeather, getDates, getIndexCount} from '../../service'
 
 export default {
@@ -108,6 +107,7 @@ export default {
       this.eventsCount = (await getIndexCount()).list
       const dates = await getDates()
       this.datesInfo = dates.list
+      // console.log(this.datesInfo)
       this.currentIndex = Math.floor(dates.list.length / 2)
       this.showIndex = this.currentIndex
       this.today = dates.today

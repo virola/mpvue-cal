@@ -7,6 +7,10 @@ export default {
     wx.setStorageSync('logs', logs)
 
     console.log('app created and cache logs by setStorageSync')
+  },
+  // 捕获 app error
+  onError (err) {
+    console.log(err)
   }
 }
 </script>
