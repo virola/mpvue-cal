@@ -17,6 +17,7 @@ const DATA_URLS = {
   LOGIN: DATA_API + 'session/login',
   GET_EVENTS: DATA_API + 'index/events',
   GET_EVENTS_COUNT: DATA_API + 'index/count',
+  GET_MY_EVENTS: DATA_API + 'index/mine',
   EVENTS (id) {
     if (!id) {
       return DATA_API + 'events'
@@ -65,6 +66,10 @@ export const fetch = async (url, params = {}, type = 'GET') => {
   if (resp.status === 'ok') {
     return resp.data
   } else {
+    if (resp.status === 401) {
+      // 权限问题，重新尝试登录
+      store.dispatch('getUserData')
+    }
     // 数据请求失败
     return {
       status: resp.status || 'error',
@@ -93,7 +98,6 @@ export const getDates = (date = '') => fetch(DATA_URLS.DATES, date)
  */
 export const getLocation = () => {
   return new Promise((resolve, reject) => {
-    console.log('wx.getSetting, scope.userLocation')
     // 可以通过 wx.getSetting 先查询一下用户是否授权了 "scope.userLocation" 这个 scope
     wx.getSetting({
       success (res) {
@@ -111,6 +115,17 @@ export const getLocation = () => {
                   reject(ret)
                 }
               })
+            },
+            fail (ret) {
+              reject(ret)
+            }
+          })
+        } else {
+          // 已经授权
+          wx.getLocation({
+            type: 'wgs84',
+            success (res) {
+              resolve(res)
             },
             fail (ret) {
               reject(ret)
@@ -155,10 +170,12 @@ export const getIndexCount = () => fetch(DATA_URLS.GET_EVENTS_COUNT)
 export const getEventsByDate = ({
   date = '',
   page = 1
-}) => fetch(DATA_URLS.GET_EVENTS, {
-  date,
-  page
-})
+}) => fetch(DATA_URLS.GET_EVENTS, { date, page })
+
+export const getMyEvents = ({
+  date = '',
+  page = 1
+}) => fetch(DATA_URLS.GET_MY_EVENTS, { date, page })
 
 /**
  * 新增生日

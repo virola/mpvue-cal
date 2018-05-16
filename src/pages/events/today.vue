@@ -101,6 +101,7 @@ export default {
   },
   methods: {
     async initData () {
+      this.inited = 0
       this.showIndex = -1
       const queryDate = this.$root.$mp.query.date
       this.date = queryDate
@@ -209,6 +210,10 @@ export default {
   right: 30rpx;
   bottom: 30rpx;
   font-size: 26rpx;
+}
+.date-tag {
+  top: 40%;
+  bottom: auto;
 }
 .date {
   display: none;

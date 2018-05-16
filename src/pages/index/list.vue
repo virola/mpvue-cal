@@ -4,8 +4,8 @@
       <span v-if="weatherInfo">{{weatherInfo.now.tmp}}℃ {{weatherInfo.basic.parent_city}} {{weatherInfo.basic.location}}</span>
       <img v-if="userInfo" :src="userInfo.avatarUrl" width="20rpx" height="20rpx">
     </a>
-    <div class="main">
-      <div v-if="datesInfo" class="card-row" :style="{transform: 'translateX(' + -(showIndex - currentIndex) * 750 * (0.72 + 0.04) + 'rpx)'}">
+    <div class="main" :style="{height: (clientHeight * 0.8) + 'px'}">
+      <div @touchstart.prevent="dragStartEvent" @touchmove.prevent="dragMoveEvent"  @touchend.prevent="dragEndEvent" v-if="datesInfo" class="card-row" :style="{transform: 'translateX(' + (-(showIndex - currentIndex) * 750 * (0.72 + 0.04) + cardTranslate) + 'rpx)'}">
         <div class="card" :class="'card-style-' + index" :style="{transform: 'translateX(' + (index - currentIndex) * 105 +'%)'}" @click="changeCard(index)" @tap="changeCard(index)" v-for="(item, index) in datesInfo" :key="index">
           <div class="card-bd">
             <div class="event-count" v-if="eventsCount && eventsCount[index] && eventsCount[index].count">
@@ -26,10 +26,18 @@
           </div>
         </div>
       </div>
-      <add :date="currentDate" @created="createSuccess" @showDialog="bindShowAdd"></add>
     </div>
-    <mptoast />
+    <div class="events" v-if="myEvents[currentDate] && myEvents[currentDate].length">
+      <h3 class="title text-title">我的提醒</h3>
+      <ul>
+        <li v-for="(event, index) in myEvents[currentDate]" :key="index">
+          <h3>{{event.name}}</h3>
+        </li>
+      </ul>
+    </div>
 
+    <mptoast />
+    <add :date="currentDate" @created="createSuccess" @showDialog="bindShowAdd"></add>
     <authDialog :show="showAuthorize" @hide="changeAuthorize(0)" />
   </div>
 </template>
@@ -55,7 +63,16 @@ export default {
       showIndex: 0,
       eventsCount: null,
       cardTranslate: 0,
-      codeParams: {}
+      codeParams: {},
+      // for touch events
+      winwidth: wx.getSystemInfoSync().windowWidth,
+      clientHeight: wx.getSystemInfoSync().windowHeight,
+      cardsWidth: 0,
+      dragState: {},
+      touchParams: {
+        x: 0,
+        y: 0
+      }
     }
   },
   components: {
@@ -72,6 +89,9 @@ export default {
     },
     weatherInfo () {
       return store.state.weatherInfo
+    },
+    myEvents () {
+      return store.state.myEvents
     }
   },
   created () {
@@ -79,9 +99,11 @@ export default {
     this.getUser()
     this.initData()
     this.initWeather()
+    // console.log(this.winwidth)
   },
   watch: {
-    'showIndex': 'changeCurrentDate'
+    'showIndex': 'changeCurrentDate',
+    'userData': 'changeUserLogin'
   },
   methods: {
     // 日期跳转
@@ -107,13 +129,22 @@ export default {
       this.eventsCount = (await getIndexCount()).list
       const dates = await getDates()
       this.datesInfo = dates.list
-      // console.log(this.datesInfo)
       this.currentIndex = Math.floor(dates.list.length / 2)
       this.showIndex = this.currentIndex
       this.today = dates.today
+      // card总长度
+      this.cardsWidth = this.datesInfo.length * 750 * (0.72 + 0.04)
     },
     changeCurrentDate (index) {
       this.currentDate = this.datesInfo[index].date.item
+      // console.log(this.currentDate, this.myEvents, this.userData)
+      if (!this.myEvents[this.currentDate]) {
+        if (this.userData && this.userData.id > 0) {
+          store.dispatch('getUserEvents', {
+            date: this.currentDate
+          })
+        }
+      }
     },
     showToast (msg = '提示信息') {
       this.$mptoast(msg)
@@ -133,6 +164,9 @@ export default {
         // +1
         this.eventsCount[this.showIndex].count++
       }
+      if (event.id && this.myEvents[event.date]) {
+        this.myEvents[event.date].unshift(event)
+      }
     },
     // 显示新建事件的时候，需要验证用户权限
     bindShowAdd (params) {
@@ -142,6 +176,146 @@ export default {
     },
     changeAuthorize (val) {
       this.showAuthorize = val
+    },
+    async changeUserLogin (vals) {
+      if (vals.id > 0) {
+        store.dispatch('getUserEvents', {
+          date: this.currentDate
+        })
+        this.eventsCount = (await getIndexCount()).list
+      }
+    },
+    bindNoTouch () {
+      // console.log('prevent touch')
+      // return false
+    },
+    // for touch events
+    bindTouchStart (ev) {
+      let dragState = this.dragState
+      let event = ev.mp
+
+      let touch = event.changedTouches ? event.changedTouches[0] : event
+      dragState.startTime = new Date()
+      dragState.startLeft = touch.pageX
+      dragState.startTop = touch.pageY
+      dragState.startTopAbsolute = touch.clientY
+      dragState.dragPage = this.showIndex
+      dragState.pageWidth = this.winwidth * 0.72
+      // prev & next
+      dragState.prevPage = dragState.dragPage === 0 ? null : dragState.dragPage - 1
+      dragState.nextPage = dragState.dragPage === this.datesInfo.length - 1 ? null : dragState.dragPage + 1
+      // debug
+      // console.log(dragState)
+    },
+    bindTouchMove (ev) {
+      let dragState = this.dragState
+      let event = ev.mp
+      let touch = event.changedTouches ? event.changedTouches[0] : event
+      dragState.currentLeft = touch.pageX
+      dragState.currentTop = touch.pageY
+      dragState.currentTopAbsolute = touch.clientY
+      let offsetLeft = dragState.currentLeft - dragState.startLeft
+      let offsetTop = dragState.currentTopAbsolute - dragState.startTopAbsolute
+      let distanceX = Math.abs(offsetLeft)
+      let distanceY = Math.abs(offsetTop)
+      if (distanceX < 5 || (distanceX >= 5 && distanceY >= 1.73 * distanceX)) {
+        this.userScrolling = true
+        return
+      } else {
+        this.userScrolling = false
+        ev.preventDefault()
+      }
+      offsetLeft = Math.min(Math.max(-dragState.pageWidth + 1, offsetLeft), dragState.pageWidth - 1)
+      // console.log(dragState, offsetLeft)
+
+      let towards = offsetLeft < 0 ? 'next' : 'prev'
+      if (dragState.prevPage !== null && towards === 'prev') {
+        this.translate(dragState.prevPage, offsetLeft - dragState.pageWidth)
+      } else if (dragState.nextPage !== null && towards === 'next') {
+        this.translate(dragState.nextPage, offsetLeft + dragState.pageWidth)
+      } else {
+        // when continuous=false and it's the end of each side,
+        // limit swipe width with quadratic-functional ease
+        // y = (-1 / dk) x (|x| - 2k)
+        const k = dragState.pageWidth
+        const x = offsetLeft
+        const d = 6 // scroll until 1/d of screenWidth at maximum
+        offsetLeft = -1 / d / k * x * (Math.abs(x) - 2 * k)
+      }
+      this.translate(dragState.dragPage, offsetLeft)
+    },
+    bindTouchEnd (ev) {
+      // console.log(ev)
+      let dragState = this.dragState
+      let dragDuration = new Date() - dragState.startTime
+      let towards = null
+      let offsetLeft = dragState.currentLeft - dragState.startLeft
+      let offsetTop = dragState.currentTop - dragState.startTop
+      let pageWidth = dragState.pageWidth
+      let index = this.showIndex
+      let pageCount = this.datesInfo.length
+
+      if (dragDuration < 300) {
+        let fireTap = Math.abs(offsetLeft) < 5 && Math.abs(offsetTop) < 5
+        if (isNaN(offsetLeft) || isNaN(offsetTop)) {
+          fireTap = true
+        }
+        if (fireTap) {
+          // this.$children[this.index].$emit('tap')
+        }
+      }
+      if (dragDuration < 300 && dragState.currentLeft === undefined) return
+      if (dragDuration < 300 || Math.abs(offsetLeft) > pageWidth / 2) {
+        towards = offsetLeft < 0 ? 'next' : 'prev'
+      }
+      if (!this.continuous) {
+        if ((index === 0 && towards === 'prev') || (index === pageCount - 1 && towards === 'next')) {
+          towards = null
+        }
+      }
+      if (this.$children.length < 2) {
+        towards = null
+      }
+      this.doAnimate(towards)
+      this.dragState = {}
+    },
+    dragStartEvent (event) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.dragging = true
+      this.userScrolling = false
+      this.bindTouchStart(event)
+    },
+    dragMoveEvent (event) {
+      if (!this.dragging) {
+        return
+      }
+      this.bindTouchMove(event)
+    },
+    dragEndEvent (event) {
+      if (this.userScrolling) {
+        this.dragging = false
+        this.dragState = {}
+        return
+      }
+      if (!this.dragging) {
+        return
+      }
+      this.bindTouchEnd(event)
+      this.dragging = false
+    },
+    translate (pageIndex, offset) {
+      // console.log(pageIndex, offset)
+      this.cardTranslate = offset * 750 / this.winwidth
+    },
+    doAnimate (towards) {
+      // console.log('animate:', towards)
+      if (towards === 'prev') {
+        this.showIndex = Math.max(this.showIndex - 1, 0)
+      } else if (towards === 'next') {
+        this.showIndex = Math.min(this.showIndex + 1, this.datesInfo.length - 1)
+      }
+      this.cardTranslate = 0
     }
   }
 }
@@ -166,9 +340,30 @@ $img-size: 60rpx;
   }
 }
 .main {
-  width: 100%;
-  height: 100%;
+  position: relative;
+  width: $win-width;
+  // background: #ccc;
   overflow: hidden;
+}
+.events {
+  // position: absolute;
+  // left: 4%;
+  // width: 92%;
+  // top: 84%;
+  padding: 20px 40px 80px;
+  .title {
+    padding: 6px 20px;
+    border-left: 3px solid $main-color;
+  }
+  ul {
+    padding: 10px 20px;
+  }
+  li {
+    color: #656565;
+    // margin: 5px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
 }
 
 $size: 120rpx;

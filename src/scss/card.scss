@@ -70,13 +70,13 @@ $win-width: 750rpx;
 // 横排的卡片视图
 $card-width: $win-width * 0.72;
 $card-pos-left: ($win-width - $card-width) / 2;
+
 .card-row {
   position: absolute;
   top: 0;
   left: 0;
   width: $win-width;
   height: 100%;
-  // transform: translateX($win-width)!important;
   -webkit-transition: all 0.3s;
   transition: all 0.3s;
   .card {
@@ -84,14 +84,15 @@ $card-pos-left: ($win-width - $card-width) / 2;
     left: $card-pos-left;
     width: $card-width;
     top: 10%;
-    height: 70%;
+    height: 88%;
     border-radius: 16rpx;
     background-color: #fff;
     color: #fff;
   }
   // 1fb58f, eab126, f24c4e, 1b7834
   // a7d2cb, f2d388, c98474, 874c62, f1dcd2
-  // 008f95, 946181
+  // 008f95, 946181, fc4a1a
+  // bright: ff3b3f
   .card-style {
     &-0 {
       background-color: #a7d2cb;
@@ -105,11 +106,14 @@ $card-pos-left: ($win-width - $card-width) / 2;
       background-color: #946181;
       box-shadow: 0 0 5px rgba($color: #946181, $alpha: .4);
     }
+    // today
+    $today: #cd5360;
     &-3 {
-      background-color: #c98474;
-      box-shadow: 0 0 5px rgba($color: #c98474, $alpha: .4);
+      background-color: $today;
+      box-shadow: 0 0 5px rgba($color: $today, $alpha: .4);
       // color: #656565;
     }
+    // tomorrow
     &-4 {
       background-color: #df744a;
       box-shadow: 0 0 5px rgba($color: #df744a, $alpha: .4);

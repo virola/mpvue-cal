@@ -2,7 +2,7 @@
 // make sure to call Vue.use(Vuex) if using a module system
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {getCodeIds, userLogin} from '@/service'
+import {getCodeIds, userLogin, getMyEvents} from '@/service'
 
 Vue.use(Vuex)
 
@@ -11,8 +11,7 @@ const store = new Vuex.Store({
     code: '',
     userData: null,
     userInfo: null,
-    wxlogin: false,
-    syslogin: false,
+    myEvents: {},
     weatherInfo: null
   },
   mutations: {
@@ -20,17 +19,20 @@ const store = new Vuex.Store({
       state.code = code
     },
     // 微信端用户登录
-    setUserInfo: (state, data) => {
+    setUserInfo (state, data) {
       state.userInfo = data
-      state.wxlogin = true
     },
     // 系统端用户登录
-    setUserData: (state, data) => {
+    setUserData (state, data) {
       state.userData = data
-      state.syslogin = true
     },
-    setWeatherInfo: (state, data) => {
+    setWeatherInfo (state, data) {
       state.weatherInfo = data
+    },
+    setEventsByDate (state, res) {
+      if (res.date) {
+        state.myEvents[res.date] = res.data
+      }
     }
   },
   actions: {
@@ -66,20 +68,42 @@ const store = new Vuex.Store({
       })
     },
     async getUserData ({
-      commit, state
+      commit, state, dispatch
     }) {
       if (state.code) {
         console.log('sys.setLogin')
-        const ids = await getCodeIds({code: state.code})
-        // set an open_id for development
-        if (!ids['open_id']) {
-          ids['open_id'] = 'default_' + 200
+        try {
+          const ids = await getCodeIds({code: state.code})
+          // set an open_id for development
+          if (!ids['open_id']) {
+            ids['open_id'] = 'default_' + 200
+          }
+          ids['nickname'] = state.userInfo.nickName
+          const resp = await userLogin(ids)
+          if (resp.id > 0) {
+            commit('setUserData', {...resp})
+          }
+        } catch (e) {
+          console.log(e)
         }
-        ids['nickname'] = state.userInfo.nickName
-        // console.log(ids)
-        const resp = await userLogin(ids)
-        // console.log(resp)
-        commit('setUserData', {...resp})
+      }
+    },
+    async getUserEvents ({
+      commit, state
+    }, { date = '', page = 1 }) {
+      // 已登录
+      if (state.userData) {
+        try {
+          const events = await getMyEvents({ date, page })
+          commit('setEventsByDate', {
+            date: events.date,
+            data: events.list
+          })
+        } catch (e) {
+          console.log(e)
+        }
+      } else {
+        console.log('not login')
       }
     }
   }

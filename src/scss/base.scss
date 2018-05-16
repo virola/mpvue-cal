@@ -1,7 +1,9 @@
 @import 'mixin';
 
 page {
+  width: $win-width;
   min-height: 100%;
+  overflow: hidden;
 }
 page {
   background-color: #F8F8F8;
@@ -43,6 +45,9 @@ page {
 
 .container {
   min-height: 100%;
+}
+.text-title {
+  color: $main-color;
 }
 .text-info {
   color: #17a2b8!important;

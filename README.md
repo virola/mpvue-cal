@@ -1,6 +1,14 @@
-# wx-cal
+# 生日提醒小程序
 
 > A Mpvue project. It's a Calendar App
+
+5.14日提交审核，第二天收到通知审核通过，然后我的生日提醒小程序终于上线了 —— 2018.5.15
+
+目前功能还是比较粗糙，还得继续完善完善。
+
+小程序码：
+
+<img src="mp.jpg">
 
 ## Build Setup
 
@@ -18,4 +26,3 @@ npm run build
 npm run build --report
 ```
 
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
