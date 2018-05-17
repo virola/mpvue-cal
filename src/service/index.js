@@ -3,17 +3,15 @@
  */
 import store from '@/store'
 // production
-const API = 'https://www.virola-eko.com/2018/wxcard-api/'
-const DATA_API = 'https://www.virola-eko.com/api/v1/'
+// const API = 'https://www.virola-eko.com/2018/wxcard-api/'
+// const DATA_API = 'https://www.virola-eko.com/api/v1/'
 // development
-// const API = 'http://localhost/2018/projects/wxcard-api/'
-// const DATA_API = 'http://127.0.0.1:3000/api/v1/'
+const API = 'http://localhost/2018/projects/wxcard-api/'
+const DATA_API = 'http://127.0.0.1:3000/api/v1/'
 
 const DATA_URLS = {
   WEATHER: API + 'weather.php',
   DATES: API + 'date.php',
-  GET_IDS: API + 'decode/demo.php',
-
   LOGIN: DATA_API + 'session/login',
   GET_EVENTS: DATA_API + 'index/events',
   GET_EVENTS_COUNT: DATA_API + 'index/count',
@@ -46,6 +44,20 @@ export const fetch = async (url, params = {}, type = 'GET') => {
     headers['Authorization'] = usertoken
   }
   type = type.toUpperCase()
+
+  // 非GET请求时，做checkSession的尝试
+  if (type !== 'GET') {
+    wx.checkSession({
+      success () {
+        // session_key 未过期，并且在本生命周期一直有效
+      },
+      fail () {
+        // session_key 已经失效，需要重新执行登录流程
+        // 重新登录
+        store.dispatch('getUserInfo')
+      }
+    })
+  }
   const resp = await new Promise((resolve, reject) => {
     // console.log(url)
     wx.request({
@@ -64,6 +76,10 @@ export const fetch = async (url, params = {}, type = 'GET') => {
   })
   // 数据请求成功
   if (resp.status === 'ok') {
+    // session key hold
+    // if (resp.session) {
+    //   store.commit('setSession', resp.session)
+    // }
     return resp.data
   } else {
     if (resp.status === 401) {
@@ -141,18 +157,10 @@ export const getLocation = () => {
 }
 
 /**
- * 获取OPEN_ID
- * @param {Object} params post参数
- * @param {String} params.code code
- * @param {String} params.encryptedData encryptedData
- */
-export const getCodeIds = (params) => fetch(DATA_URLS.GET_IDS, params, 'post')
-
-/**
  * 去后台登录或创建用户
  * @param {Object} params post参数
- * @param {String} params.open_id 用户登录码
- * @param {String} params.username 用户名
+ * @param {String} params.code 微信用户登录码
+ * @param {String} params.nickname 微信昵称
  */
 export const userLogin = (params) => fetch(DATA_URLS.LOGIN, params, 'post')
 

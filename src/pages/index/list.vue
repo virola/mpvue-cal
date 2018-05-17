@@ -18,7 +18,7 @@
               <div class="box" @click="bindBoxClick(item.date.item)">
                 <p>{{item.date.format}}</p>
                 <p>{{item.lunar.date}}</p>
-                <p>{{item.lunar.year}}</p>
+                <p v-if="item.format_text === '今天'">{{item.lunar.year}}</p>
                 <p class="info" v-if="item.format_text !== item.date.item">{{item.format_text}}</p>
                 <p class="tip" v-if="eventsCount[index].count">点击进入生日列表</p>
               </div>
@@ -27,7 +27,7 @@
         </div>
       </div>
     </div>
-    <div class="events" v-if="myEvents[currentDate] && myEvents[currentDate].length">
+    <div class="events" v-show="myEvents[currentDate] && myEvents[currentDate].length">
       <h3 class="title text-title">我的提醒</h3>
       <ul>
         <li v-for="(event, index) in myEvents[currentDate]" :key="index">
@@ -47,14 +47,16 @@ import mptoast from 'mptoast'
 import add from '../../components/add'
 import authDialog from '../../components/authorize'
 import store from '@/store'
-import {getLocation, getWeather, getDates, getIndexCount} from '../../service'
+import {getLocation, getWeather, getDates, getIndexCount, getMyEvents} from '../../service'
 
 export default {
   data () {
     return {
+      dataInited: 0,
       // 授权登录mask
-      showAuthorize: false,
+      showAuthorize: 0,
       datesInfo: null,
+      myEvents: {},
       today: null,
       currentDate: '',
       // 最中间那个card - 今天
@@ -89,9 +91,6 @@ export default {
     },
     weatherInfo () {
       return store.state.weatherInfo
-    },
-    myEvents () {
-      return store.state.myEvents
     }
   },
   created () {
@@ -99,7 +98,6 @@ export default {
     this.getUser()
     this.initData()
     this.initWeather()
-    // console.log(this.winwidth)
   },
   watch: {
     'showIndex': 'changeCurrentDate',
@@ -112,6 +110,8 @@ export default {
       wx.navigateTo({ url })
     },
     async initWeather () {
+      // todo
+      // 每小时更新一次天气实况
       if (!this.weatherInfo) {
         const location = await getLocation()
         // weather
@@ -134,15 +134,18 @@ export default {
       this.today = dates.today
       // card总长度
       this.cardsWidth = this.datesInfo.length * 750 * (0.72 + 0.04)
+      // set mark
+      this.dataInited = 1
     },
-    changeCurrentDate (index) {
+    // 数据请求
+    async changeCurrentDate (index) {
       this.currentDate = this.datesInfo[index].date.item
-      // console.log(this.currentDate, this.myEvents, this.userData)
       if (!this.myEvents[this.currentDate]) {
         if (this.userData && this.userData.id > 0) {
-          store.dispatch('getUserEvents', {
+          const res = await getMyEvents({
             date: this.currentDate
           })
+          this.myEvents[this.currentDate] = res.list
         }
       }
     },
@@ -153,7 +156,6 @@ export default {
       if (!this.userInfo) {
         store.dispatch('getUserInfo')
       }
-      // 调用登录接口
     },
     // click handler
     changeCard (index) {
@@ -163,6 +165,7 @@ export default {
       if (event.id && event.date === this.eventsCount[this.showIndex].date) {
         // +1
         this.eventsCount[this.showIndex].count++
+        // this.myEvents[this.currentDate].unshift(event)
       }
       if (event.id && this.myEvents[event.date]) {
         this.myEvents[event.date].unshift(event)
@@ -179,10 +182,14 @@ export default {
     },
     async changeUserLogin (vals) {
       if (vals.id > 0) {
-        store.dispatch('getUserEvents', {
-          date: this.currentDate
-        })
-        this.eventsCount = (await getIndexCount()).list
+        try {
+          this.eventsCount = (await getIndexCount()).list
+          const res = await getMyEvents({})
+          this.myEvents[res.date] = res.list
+          // console.log(this.myEvents)
+        } catch (e) {
+          console.log(e)
+        }
       }
     },
     bindNoTouch () {
@@ -226,7 +233,6 @@ export default {
         ev.preventDefault()
       }
       offsetLeft = Math.min(Math.max(-dragState.pageWidth + 1, offsetLeft), dragState.pageWidth - 1)
-      // console.log(dragState, offsetLeft)
 
       let towards = offsetLeft < 0 ? 'next' : 'prev'
       if (dragState.prevPage !== null && towards === 'prev') {
@@ -245,7 +251,6 @@ export default {
       this.translate(dragState.dragPage, offsetLeft)
     },
     bindTouchEnd (ev) {
-      // console.log(ev)
       let dragState = this.dragState
       let dragDuration = new Date() - dragState.startTime
       let towards = null
@@ -305,11 +310,9 @@ export default {
       this.dragging = false
     },
     translate (pageIndex, offset) {
-      // console.log(pageIndex, offset)
       this.cardTranslate = offset * 750 / this.winwidth
     },
     doAnimate (towards) {
-      // console.log('animate:', towards)
       if (towards === 'prev') {
         this.showIndex = Math.max(this.showIndex - 1, 0)
       } else if (towards === 'next') {

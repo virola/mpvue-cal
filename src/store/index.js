@@ -2,7 +2,7 @@
 // make sure to call Vue.use(Vuex) if using a module system
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {getCodeIds, userLogin, getMyEvents} from '@/service'
+import {userLogin} from '@/service'
 
 Vue.use(Vuex)
 
@@ -11,7 +11,6 @@ const store = new Vuex.Store({
     code: '',
     userData: null,
     userInfo: null,
-    myEvents: {},
     weatherInfo: null
   },
   mutations: {
@@ -28,11 +27,6 @@ const store = new Vuex.Store({
     },
     setWeatherInfo (state, data) {
       state.weatherInfo = data
-    },
-    setEventsByDate (state, res) {
-      if (res.date) {
-        state.myEvents[res.date] = res.data
-      }
     }
   },
   actions: {
@@ -73,37 +67,17 @@ const store = new Vuex.Store({
       if (state.code) {
         console.log('sys.setLogin')
         try {
-          const ids = await getCodeIds({code: state.code})
-          // set an open_id for development
-          if (!ids['open_id']) {
-            ids['open_id'] = 'default_' + 200
-          }
-          ids['nickname'] = state.userInfo.nickName
-          const resp = await userLogin(ids)
+          // 用code去server端验证，并创建登录用户
+          const resp = await userLogin({
+            code: state.code,
+            nickname: state.userInfo.nickName
+          })
           if (resp.id > 0) {
             commit('setUserData', {...resp})
           }
         } catch (e) {
           console.log(e)
         }
-      }
-    },
-    async getUserEvents ({
-      commit, state
-    }, { date = '', page = 1 }) {
-      // 已登录
-      if (state.userData) {
-        try {
-          const events = await getMyEvents({ date, page })
-          commit('setEventsByDate', {
-            date: events.date,
-            data: events.list
-          })
-        } catch (e) {
-          console.log(e)
-        }
-      } else {
-        console.log('not login')
       }
     }
   }
