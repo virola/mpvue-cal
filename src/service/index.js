@@ -3,11 +3,11 @@
  */
 import store from '@/store'
 // production
-// const API = 'https://www.virola-eko.com/2018/wxcard-api/'
-// const DATA_API = 'https://www.virola-eko.com/api/v1/'
+const API = 'https://www.virola-eko.com/2018/wxcard-api/'
+const DATA_API = 'https://www.virola-eko.com/api/v1/'
 // development
-const API = 'http://localhost/2018/projects/wxcard-api/'
-const DATA_API = 'http://127.0.0.1:3000/api/v1/'
+// const API = 'http://localhost/2018/projects/wxcard-api/'
+// const DATA_API = 'http://127.0.0.1:3000/api/v1/'
 
 const DATA_URLS = {
   WEATHER: API + 'weather.php',
